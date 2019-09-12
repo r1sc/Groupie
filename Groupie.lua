@@ -22,23 +22,21 @@ function RefreshPartyXPBars()
     local numMembers = GetNumGroupMembers()
     for i=1,numMembers-1 do
         local name_i =  UnitName("party"..i)
-        local expBar = _G["PartyMemberFrame"..i.."ExperienceBar"]
+        local expMarker = _G["PartyMember"..i.."ExpMarker"]
         local partyMemberXp = Groupie_XPs[name_i]
 
-        if partyMemberXp ~= nil then
+        if partyMemberXp ~= nil then            
             debug_print("Updating xp bar for "..name_i)
 
-            local expPercent = floor((partyMemberXp.xp / partyMemberXp.xpMax) * 100)
-            expBar:SetMinMaxValues(0, 100)
-            expBar:SetValue(expPercent)
+            SetPortraitTexture(expMarker.portrait, "party"..i)
 
-            
-            expBar.value:SetText(expPercent.."%")
-
-            expBar:Show()
+            local expPercent = (partyMemberXp.xp / partyMemberXp.xpMax)
+            expMarker:SetPoint("CENTER", MainMenuExpBar, "LEFT", expPercent * MainMenuExpBar:GetWidth(), 0)
+                        
+            expMarker:Show()
         else
             debug_print("No xp data for "..name_i)
-            expBar:Hide()
+            expMarker:Hide()
         end
     end
 end
@@ -88,32 +86,23 @@ Groupie:SetScript("OnEvent", function(self, event, ...)
     end
 end)
 
+
 -- Set up party experience frames
-for i=1,4 do
-    local partyMemberFrame = _G["PartyMemberFrame"..i]
-    local expBar = CreateFrame("StatusBar", "PartyMemberFrame"..i.."ExperienceBar", partyMemberFrame)
-    
-    expBar:SetPoint("TOPLEFT", partyMemberFrame, "BOTTOMLEFT", 50, 22)
-    expBar:SetWidth(65)
-    expBar:SetHeight(8)
-    expBar:SetStatusBarTexture("Interface\\TARGETINGFRAME\\UI-StatusBar")
-    expBar:GetStatusBarTexture():SetHorizTile(false)
-    expBar:GetStatusBarTexture():SetVertTile(false)
+for i=1,4 do    
+    local f = CreateFrame("Frame", "PartyMember"..i.."ExpMarker", MainMenuExpBar)
+    f:SetWidth(20)
+    f:SetHeight(20)
+    f:SetFrameStrata("HIGH")
 
-    expBar.bg = expBar:CreateTexture(nil, "BACKGROUND")
-    expBar.bg:SetTexture("Interface\\TARGETINGFRAME\\UI-StatusBar")
-    expBar.bg:SetAllPoints(true)
-    expBar.bg:SetVertexColor(0, 0, 0)
+    f:SetPoint("CENTER", MainMenuExpBar, "LEFT", 0, 0)
 
-    expBar.value = expBar:CreateFontString(nil, "OVERLAY")
-    expBar.value:SetPoint("CENTER", expBar, "CENTER", 0, 0)
-    expBar.value:SetFont("Fonts\\FRIZQT__.TTF", 11, "OUTLINE")
-    expBar.value:SetJustifyH("LEFT")
-    expBar.value:SetTextColor(1, 1, 1)
-    expBar.value:SetText("N/A")
+    f.bg = f:CreateTexture(nil, "MEDIUM")
+    f.bg:SetTexture("Interface/Common/BlueMenuRing")
+    f.bg:SetPoint("TOPLEFT", f, "TOPLEFT", -5, 5)
+    f.bg:SetWidth(38)
+    f.bg:SetHeight(38)
 
-    expBar:SetMinMaxValues(0, 100)
-    expBar:SetValue(0)
-    expBar:SetStatusBarColor(1, 1, 0)
-    expBar:Hide()
+    f.portrait = f:CreateTexture(nil, "BACKGROUND")
+    f.portrait:SetAllPoints(true)
+    f:Hide()
 end
