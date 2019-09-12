@@ -15,12 +15,12 @@ end
 
 function Groupie_SendAddonMessage(prefix, message, channel)
     debug_print("SendAddonMessage("..prefix..","..message..","..channel..")")
-    SendAddonMessage(prefix, message, channel)    
+    C_ChatInfo.SendAddonMessage(prefix, message, channel)    
 end
 
 function RefreshPartyXPBars()
     local numMembers = GetNumGroupMembers()
-    for i=1,numMembers do
+    for i=1,numMembers-1 do
         local name_i =  UnitName("party"..i)
         local expBar = _G["PartyMemberFrame"..i.."ExperienceBar"]
         local partyMemberXp = Groupie_XPs[name_i]
@@ -60,12 +60,12 @@ local events = {
     CHAT_MSG_ADDON = function(prefix, message, channel, sender)        
         if prefix == "Groupie_XP" then
             local _, _, xp, xpMax = string.find(message, "(%d+)|(%d+)")
-
+            local name, _ = strsplit("-", sender)
             if Groupie_Debug then
-                debug_print("Received XP update from "..sender..": Now: "..xp.." Max: "..xpMax)
+                debug_print("Received XP update from "..name..": Now: "..xp.." Max: "..xpMax)
             end
             
-            Groupie_XPs[partyMemberName] = { xp = xp, xpMax = xpMax }
+            Groupie_XPs[name] = { xp = xp, xpMax = xpMax }
             RefreshPartyXPBars()
         end        
     end
