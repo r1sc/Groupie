@@ -1,4 +1,4 @@
-Groupie_Debug = true
+Groupie_Debug = false
 Groupie_XPs = {}
 
 local debug_print = function(...)
@@ -28,10 +28,11 @@ function RefreshPartyXPBars()
         if partyMemberXp ~= nil then
             debug_print("Updating xp bar for "..name_i)
 
-            expBar:SetMinMaxValues(partyMemberXp.xp, partyMemberXp.xpMax)
-            expBar:SetValue(partyMemberXp.xp)
-
             local expPercent = floor((partyMemberXp.xp / partyMemberXp.xpMax) * 100)
+            expBar:SetMinMaxValues(0, 100)
+            expBar:SetValue(expPercent)
+
+            
             expBar.value:SetText(expPercent.."%")
 
             expBar:Show()
@@ -91,8 +92,10 @@ end)
 for i=1,4 do
     local partyMemberFrame = _G["PartyMemberFrame"..i]
     local expBar = CreateFrame("StatusBar", "PartyMemberFrame"..i.."ExperienceBar", partyMemberFrame)
-    expBar:SetFrameStrata("BACKGROUND")
+    
     expBar:SetPoint("TOPLEFT", partyMemberFrame, "BOTTOMLEFT", 50, 22)
+    expBar:SetWidth(65)
+    expBar:SetHeight(8)
     expBar:SetStatusBarTexture("Interface\\TARGETINGFRAME\\UI-StatusBar")
     expBar:GetStatusBarTexture():SetHorizTile(false)
     expBar:GetStatusBarTexture():SetVertTile(false)
@@ -112,5 +115,5 @@ for i=1,4 do
     expBar:SetMinMaxValues(0, 100)
     expBar:SetValue(0)
     expBar:SetStatusBarColor(1, 1, 0)
-    expBar:Show()
+    expBar:Hide()
 end
