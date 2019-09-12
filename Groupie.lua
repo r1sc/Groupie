@@ -46,8 +46,9 @@ end
 
 local events = {
     ADDON_LOADED = function(addonName)
-        if addonName == "Groupie" then
-            print("Groupie: Hello world!")
+        if addonName == "Groupie" then            
+            local result = C_ChatInfo.RegisterAddonMessagePrefix("Groupie_XP")
+            print("Groupie: Hello world! Registered addon message: "..(result and "yes" or "no"))
         end
     end,
     GROUP_ROSTER_UPDATE = function()
