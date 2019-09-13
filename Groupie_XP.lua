@@ -7,18 +7,20 @@ local debug_print = function(...)
     end
 end
 
-function SendXP()
-    local xp = UnitXP("player")
-    local xpMax = UnitXPMax("player")
-    Groupie_SendAddonMessage("Groupie_XP", xp.."|"..xpMax, "PARTY")
-end
-
-function Groupie_SendAddonMessage(prefix, message, channel)
+local send = function(message)
+    local prefix = "Groupie_XP"
+    local channel = "PARTY"
     debug_print("SendAddonMessage("..prefix..","..message..","..channel..")")
     C_ChatInfo.SendAddonMessage(prefix, message, channel)    
 end
 
-function RefreshFrame(expMarker, portraitTextureName, name, xpTable)
+local sendXP = function()
+    local xp = UnitXP("player")
+    local xpMax = UnitXPMax("player")
+    send(xp.."|"..xpMax)
+end
+
+function Groupie_RefreshFrame(expMarker, portraitTextureName, name, xpTable)
 	SetPortraitTexture(expMarker.portrait, portraitTextureName)
 
 	local expPercent = (xpTable.xp / xpTable.xpMax)
@@ -38,8 +40,7 @@ function RefreshPartyXPBars()
 		
         if partyMemberXp ~= nil then            
             debug_print("Updating xp bar for "..name_i)
-			RefreshFrame(expMarker, "party"..i, name_i, partyMemberXp)
-            
+			Groupie_RefreshFrame(expMarker, "party"..i, name_i, partyMemberXp)
         else
             debug_print("No xp data for "..name_i)
             expMarker:Hide()
@@ -54,6 +55,8 @@ local events = {
         if addonName == "Groupie_XP" then            
             local result = C_ChatInfo.RegisterAddonMessagePrefix("Groupie_XP")
             print("|cffffff00Groupie_XP:|r Welcome to the wonderful World of Warcraft "..UnitName("player").."! Have a good hunt!")
+            sendXP()
+            send("REQ")
         end
     end,
     GROUP_ROSTER_UPDATE = function()
@@ -65,14 +68,18 @@ local events = {
     end,
     CHAT_MSG_ADDON = function(prefix, message, channel, sender)        
         if prefix == "Groupie_XP" then
-            local _, _, xp, xpMax = string.find(message, "(%d+)|(%d+)")
-            local name, _ = strsplit("-", sender)
-            if Groupie_Debug then
-                debug_print("Received XP update from "..name..": Now: "..xp.." Max: "..xpMax)
+            if message == "REQ" then
+                sendXP()
+            else
+                local _, _, xp, xpMax = string.find(message, "(%d+)|(%d+)")
+                local name, _ = strsplit("-", sender)
+                if Groupie_Debug then
+                    debug_print("Received XP update from "..name..": Now: "..xp.." Max: "..xpMax)
+                end
+                
+                Groupie_XPs[name] = { xp = xp, xpMax = xpMax }
+                RefreshPartyXPBars()
             end
-            
-            Groupie_XPs[name] = { xp = xp, xpMax = xpMax }
-            RefreshPartyXPBars()
         end        
     end
 }
