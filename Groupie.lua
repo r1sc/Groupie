@@ -18,22 +18,28 @@ function Groupie_SendAddonMessage(prefix, message, channel)
     C_ChatInfo.SendAddonMessage(prefix, message, channel)    
 end
 
+function RefreshFrame(expMarker, portraitTextureName, name, xpTable)
+	SetPortraitTexture(expMarker.portrait, portraitTextureName)
+
+	local expPercent = (xpTable.xp / xpTable.xpMax)
+	expMarker:SetPoint("CENTER", MainMenuExpBar, "LEFT", expPercent * MainMenuExpBar:GetWidth(), 0)
+	
+	expMarker.playerName = name.." "..floor(expPercent * 100).."%"
+	
+	expMarker:Show()
+end
+
 function RefreshPartyXPBars()
     local numMembers = GetNumGroupMembers()
     for i=1,numMembers-1 do
         local name_i =  UnitName("party"..i)
         local expMarker = _G["PartyMember"..i.."ExpMarker"]
         local partyMemberXp = Groupie_XPs[name_i]
-
+		
         if partyMemberXp ~= nil then            
             debug_print("Updating xp bar for "..name_i)
-
-            SetPortraitTexture(expMarker.portrait, "party"..i)
-
-            local expPercent = (partyMemberXp.xp / partyMemberXp.xpMax)
-            expMarker:SetPoint("CENTER", MainMenuExpBar, "LEFT", expPercent * MainMenuExpBar:GetWidth(), 0)
-                        
-            expMarker:Show()
+			RefreshFrame(expMarker, "party"..i, name_i, partyMemberXp)
+            
         else
             debug_print("No xp data for "..name_i)
             expMarker:Hide()
@@ -86,13 +92,22 @@ Groupie:SetScript("OnEvent", function(self, event, ...)
     end
 end)
 
-
 -- Set up party experience frames
 for i=1,4 do    
     local f = CreateFrame("Frame", "PartyMember"..i.."ExpMarker", MainMenuExpBar)
     f:SetWidth(20)
     f:SetHeight(20)
     f:SetFrameStrata("HIGH")
+
+	f:SetScript("OnEnter", function(self) 
+		ShowUIPanel(GameTooltip)
+		GameTooltip:SetOwner(self, "ANCHOR_CURSOR")
+		GameTooltip:SetText(self.playerName)
+		GameTooltip:Show()
+	end)
+	f:SetScript("OnLeave", function(self) 
+		GameTooltip:Hide()
+	end)
 
     f:SetPoint("CENTER", MainMenuExpBar, "LEFT", 0, 0)
 
