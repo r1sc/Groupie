@@ -24,7 +24,7 @@ function Groupie_RefreshFrame(expMarker, portraitTextureName, name, xpTable)
 	SetPortraitTexture(expMarker.portrait, portraitTextureName)
 
 	local expPercent = (xpTable.xp / xpTable.xpMax)
-	expMarker:SetPoint("CENTER", MainMenuExpBar, "LEFT", expPercent * MainMenuExpBar:GetWidth(), 0)
+	expMarker:SetPoint("CENTER",  MainMenuExpBar, "LEFT", expPercent * MainMenuExpBar:GetWidth(), 0)
 	
 	expMarker.playerName = name.." "..floor(expPercent * 100).."%"
 	
@@ -61,10 +61,10 @@ local events = {
     end,
     GROUP_ROSTER_UPDATE = function()
         RefreshPartyXPBars()
-        SendXP()
+        sendXP()
     end,
     PLAYER_XP_UPDATE = function()
-        SendXP()
+        sendXP()
     end,
     CHAT_MSG_ADDON = function(prefix, message, channel, sender)        
         if prefix == "Groupie_XP" then
