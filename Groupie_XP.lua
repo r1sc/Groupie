@@ -48,6 +48,17 @@ function RefreshPartyXPBars()
     end
 end
 
+function HidePartyXPBars()
+    for i=1,4 do
+        local expMarker = _G["PartyMember"..i.."ExpMarker"]
+        expMarker:Hide()
+    end
+end
+
+function ClearPartyXP()
+    Groupie_XPs = {}
+end
+
 -- Event handling
 
 local events = {
@@ -59,9 +70,14 @@ local events = {
             send("REQ")
         end
     end,
-    GROUP_ROSTER_UPDATE = function()
-        RefreshPartyXPBars()
-        sendXP()
+	GROUP_ROSTER_UPDATE = function()
+		if IsInGroup() then
+			RefreshPartyXPBars()
+			sendXP()
+		else
+			HidePartyXPBars()
+			ClearPartyXP()
+		end
     end,
     PLAYER_XP_UPDATE = function()
         sendXP()
