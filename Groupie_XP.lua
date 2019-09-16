@@ -55,8 +55,30 @@ function HidePartyXPBars()
     end
 end
 
-function ClearPartyXP()
-    Groupie_XPs = {}
+function PartyMemberDinged(playerName, playerLevel)
+	print("|cffffff00" .. playerName .. " has dinged level " .. playerLevel .. "!")
+end
+
+function ReceivedPlayerXP(playerName, xp, xpMax)
+	local playerLevel = UnitLevel(playerName)
+	local currentXP = Groupie_XPs[playerName]
+	
+	if currentXP ~= nil and currentXP.level < playerLevel then
+		PartyMemberDinged(playerName, playerLevel)
+	end
+
+	Groupie_XPs[playerName] = { xp = xp, xpMax = xpMax, level = playerLevel }
+	
+	RefreshPartyXPBars()
+end
+
+local handleXPUpdate = function(data, senderName)
+	local _, _, xp, xpMax = string.find(data, "(%d+)|(%d+)")
+	if Groupie_Debug then
+		debug_print("Received XP update from "..senderName..": Now: "..xp.." Max: "..xpMax)
+	end
+	
+	ReceivedPlayerXP(senderName, xp, xpMax)
 end
 
 -- Event handling
@@ -76,25 +98,19 @@ local events = {
 			sendXP()
 		else
 			HidePartyXPBars()
-			ClearPartyXP()
+			Groupie_XPs = {}
 		end
     end,
     PLAYER_XP_UPDATE = function()
         sendXP()
     end,
-    CHAT_MSG_ADDON = function(prefix, message, channel, sender)        
+    CHAT_MSG_ADDON = function(prefix, message, channel, sender)   
+		local senderName, _ = strsplit("-", sender)     
         if prefix == "Groupie_XP" then
             if message == "REQ" then
                 sendXP()
             else
-                local _, _, xp, xpMax = string.find(message, "(%d+)|(%d+)")
-                local name, _ = strsplit("-", sender)
-                if Groupie_Debug then
-                    debug_print("Received XP update from "..name..": Now: "..xp.." Max: "..xpMax)
-                end
-                
-                Groupie_XPs[name] = { xp = xp, xpMax = xpMax }
-                RefreshPartyXPBars()
+                handleXPUpdate(message, senderName)
             end
         end        
     end
@@ -117,10 +133,10 @@ end)
 
 -- Set up party experience frames
 for i=1,4 do    
-    local f = CreateFrame("Frame", "PartyMember"..i.."ExpMarker", MainMenuExpBar)
-    f:SetWidth(20)
-    f:SetHeight(20)
-    f:SetFrameStrata("HIGH")
+local f = CreateFrame("Frame", "PartyMember"..i.."ExpMarker", MainMenuExpBar)
+	f:SetWidth(20)
+	f:SetHeight(20)
+	f:SetFrameStrata("HIGH")
 
 	f:SetScript("OnEnter", function(self) 
 		ShowUIPanel(GameTooltip)
@@ -132,15 +148,15 @@ for i=1,4 do
 		GameTooltip:Hide()
 	end)
 
-    f:SetPoint("CENTER", MainMenuExpBar, "LEFT", 0, 0)
+	f:SetPoint("CENTER", MainMenuExpBar, "LEFT", 0, 0)
 
-    f.bg = f:CreateTexture(nil, "MEDIUM")
-    f.bg:SetTexture("Interface/Common/BlueMenuRing")
-    f.bg:SetPoint("TOPLEFT", f, "TOPLEFT", -5, 5)
-    f.bg:SetWidth(38)
-    f.bg:SetHeight(38)
+	f.bg = f:CreateTexture(nil, "MEDIUM")
+	f.bg:SetTexture("Interface/Common/BlueMenuRing")
+	f.bg:SetPoint("TOPLEFT", f, "TOPLEFT", -5, 5)
+	f.bg:SetWidth(38)
+	f.bg:SetHeight(38)
 
-    f.portrait = f:CreateTexture(nil, "BACKGROUND")
-    f.portrait:SetAllPoints(true)
-    f:Hide()
+	f.portrait = f:CreateTexture(nil, "BACKGROUND")
+	f.portrait:SetAllPoints(true)
+	f:Hide()
 end
