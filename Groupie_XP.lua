@@ -32,19 +32,19 @@ function Groupie_RefreshFrame(expMarker, portraitTextureName, name, xpTable)
 end
 
 function RefreshPartyXPBars()
-    local numMembers = GetNumGroupMembers()
-    for i=1,numMembers-1 do
-        local name_i =  UnitName("party"..i)
+    for i=1,5 do
+        local name_i = UnitName("party"..i)
         local expMarker = _G["PartyMember"..i.."ExpMarker"]
         local partyMemberXp = Groupie_XPs[name_i]
-		
-        if partyMemberXp ~= nil then            
-            debug_print("Updating xp bar for "..name_i)
-			Groupie_RefreshFrame(expMarker, "party"..i, name_i, partyMemberXp)
-        else
-            debug_print("No xp data for "..name_i)
-            expMarker:Hide()
+        if expMarker ~= nil then
+            if partyMemberXp ~= nil then
+                debug_print("Updating xp bar for "..name_i)
+                Groupie_RefreshFrame(expMarker, "party"..i, name_i, partyMemberXp)            
+            else
+                expMarker:Hide()
+            end
         end
+        
     end
 end
 
