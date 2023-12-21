@@ -150,7 +150,7 @@ local f = CreateFrame("Frame", "PartyMember"..i.."ExpMarker", MainMenuExpBar)
 
 	f:SetPoint("CENTER", MainMenuExpBar, "LEFT", 0, 0)
 
-	f.bg = f:CreateTexture(nil, "MEDIUM")
+	f.bg = f:CreateTexture(nil, "OVERLAY")
 	f.bg:SetTexture("Interface/Common/BlueMenuRing")
 	f.bg:SetPoint("TOPLEFT", f, "TOPLEFT", -5, 5)
 	f.bg:SetWidth(38)
